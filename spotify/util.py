@@ -17,10 +17,13 @@ def get_user_tokens(session_id):
     else:
         return None
 
+# сессионный ключ пользователя
+
 
 def update_or_create_user_tokens(session_id, access_token, token_type, expires_in, refresh_token):
 
     tokens = get_user_tokens(session_id)
+    # срок действия токена истекает сейчас + время, полученное от Spotify API
     expires_in = timezone.now() + timedelta(seconds=expires_in)
 
     if tokens:
@@ -34,6 +37,8 @@ def update_or_create_user_tokens(session_id, access_token, token_type, expires_i
         tokens = SpotifyToken(user=session_id, access_token=access_token,
                               refresh_token=refresh_token, token_type=token_type, expires_in=expires_in)
         tokens.save()
+
+# проверить, просрочен ли токен или нет, и обновить токен в случае истечения срока действия
 
 
 def is_spotify_authenticated(session_id):
@@ -52,7 +57,7 @@ def is_spotify_authenticated(session_id):
 def refresh_spotify_token(session_id):
 
     refresh_token = get_user_tokens(session_id).refresh_token
-
+    # запросить обновленный токен для Spotify
     response = post('https://accounts.spotify.com/api/token', data={
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token,
@@ -66,6 +71,8 @@ def refresh_spotify_token(session_id):
 
     update_or_create_user_tokens(
         session_id, access_token, token_type, expires_in, refresh_token)
+
+# отправить запрос на Spotify
 
 
 def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):

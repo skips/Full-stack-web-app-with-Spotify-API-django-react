@@ -10,10 +10,14 @@ class Room extends Component {
       votesToSkip: 2,
       guestCanPause: false,
       isHost: false,
+      // Нам нужна переменная состояния, которая отслеживает,
+      // находится ли страница в режиме настроек или режиме отображения, чтобы мы могли лучше отображать то, что нам нужно
       showSettings: false,
+      // переменная состояния, которая проверяет, аутентифицирован ли Spotify или нет
       spotifyAuthenticated: false,
       song: {},
     };
+    // роутер по умолчанию код комнаты в реквизите match
     this.roomCode = this.props.match.params.roomCode;
     this.leaveButtonPressed = this.leaveButtonPressed.bind(this);
     this.updateShowSettings = this.updateShowSettings.bind(this);
@@ -25,6 +29,9 @@ class Room extends Component {
     this.getRoomDetails();
   }
 
+   // Каждую секунду мы запрашиваем обновление текущей воспроизводимой песни.
+   // Итак, каждый раз, когда каждый пользователь в комнате делает запрос на Spotify
+   // Spotify не поддерживает WebSockets, но для ~50000 пользователей все эти запросы должны выполняться нормально
   componentDidMount() {
     this.interval = setInterval(this.getCurrentSong, 1000);
   }
@@ -54,17 +61,25 @@ class Room extends Component {
       });
   }
 
+  // Запрашиваем серверную часть, если Spotify аутентифицирован. НЕОБХОДИМО ЖДАТЬ getRoomDetails
   authenticateSpotify() {
     fetch("/spotify/is-authenticated")
       .then((response) => response.json())
       .then((data) => {
+        // изменить состояние на если пользователь аутентифицирован
         this.setState({ spotifyAuthenticated: data.status });
         console.log(data.status);
+        // если пользователь не аутентифицирован, нам нужно его аутентифицировать
         if (!data.status) {
           fetch("/spotify/get-auth-url")
             .then((response) => response.json())
             .then((data) => {
+              // перейти по URL-адресу для аутентификации пользователя в его учетной записи Spotify
+              // window.location.replace для перенаправления на чужую страницу
               window.location.replace(data.url);
+              // затем мы будем перенаправлены на функцию spotify_callback для сохранения токена
+              // затем в интерфейс
+              // затем в нужную комнату, в которой мы были
             });
         }
       });
@@ -85,6 +100,8 @@ class Room extends Component {
       });
   }
 
+  // Прежде чем мы запустим комнату, нам нужно удалить код комнаты из нашего сеанса.
+  // Проверьте представления в API для получения дополнительной информации.
   leaveButtonPressed() {
     const requestOptions = {
       method: "POST",
@@ -111,6 +128,8 @@ class Room extends Component {
             votesToSkip={this.state.votesToSkip}
             guestCanPause={this.state.guestCanPause}
             roomCode={this.roomCode}
+            // эта функция будет вызываться при обновлении комнаты. Когда мы покидаем обновленную комнату,
+            // мы хотим видеть изменения и на странице комнаты
             updateCallback={this.getRoomDetails}
           />
         </Grid>
@@ -127,6 +146,8 @@ class Room extends Component {
     );
   }
 
+  // Метод возвращает html для отображения кнопки настроек.
+  // Создано, потому что мы хотим отображать кнопку настроек только в том случае, если пользователь является хостом
   renderSettingsButton() {
     return (
       <Grid item xs={12} align="center">

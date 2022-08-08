@@ -20,7 +20,18 @@ body {
 
 .center {
   position: absolute;
+  width: 40%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  box-shadow: 0 15px 15px rgba(0, 0, 0, 0.2), 0px 0px 15px gray;
+  padding: 30px;
+  border-radius: 20px;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 1),
+    rgba(255, 255, 255, 0.5)
+  );
+  z-index: 2;
+  backdrop-filter: blur(2rem);
 }

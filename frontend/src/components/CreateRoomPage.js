@@ -18,6 +18,8 @@ class CreateRoomPage extends Component {
     guestCanPause: true,
     update: false,
     roomCode: null,
+    // Эта функция будет вызываться при обновлении комнаты. Когда мы покидаем обновленную комнату,
+    // мы хотим видеть изменения и на странице комнаты
     updateCallback: () => {},
   };
 
@@ -57,6 +59,8 @@ class CreateRoomPage extends Component {
         guest_can_pause: this.state.guestCanPause,
       }),
     };
+    // Я хочу перенаправить пользователя в созданную комнату.
+    // Маршрутизатор оставляет в реквизитах историю, в которой я могу складывать маршруты
     fetch("/api/create-room", requestOptions)
       .then((response) => response.json())
       .then((data) => this.props.history.push("/room/" + data.code));

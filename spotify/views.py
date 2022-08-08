@@ -10,6 +10,8 @@ from .util import update_or_create_user_tokens, is_spotify_authenticated, get_us
 from api.models import Room
 from .models import Vote
 
+# запросить авторизацию для доступа к данным
+
 
 class AuthURL(APIView):
 
@@ -24,6 +26,8 @@ class AuthURL(APIView):
         }).prepare().url
 
         return Response({'url': url}, status=status.HTTP_200_OK)
+
+# после входа пользователя мы получаем код для запроса токена и перенаправления пользователя на внешний интерфейс
 
 
 def spotify_callback(request):
@@ -52,6 +56,8 @@ def spotify_callback(request):
 
     return redirect('frontend:')
 
+# просмотреть, чтобы проверить, авторизован ли пользователь для Spotify и вызвать утилиты для обновления токена
+
 
 class IsAuthenticated(APIView):
 
@@ -59,6 +65,9 @@ class IsAuthenticated(APIView):
         is_authenticated = is_spotify_authenticated(
             self.request.session.session_key)
         return Response({'status': is_authenticated}, status=status.HTTP_200_OK)
+
+# для получения информации о текущей песне
+# поскольку эта конечная точка вызывается каждую секунду, музыкальный проигрыватель будет обновляться каждый раз
 
 
 class CurrentSong(APIView):
